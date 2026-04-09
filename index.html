@@ -4,6 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SKYNX · Shy-ng-ks</title>
+    
+    <!-- Supabase SDK -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <style>
         :root { 
             --bg: #0d1117; --sidebar: #0a0c10; --accent: #5865f2; --text: #e6edf3; 
@@ -39,7 +43,10 @@
         .badge { background: var(--accent); color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; border: none; cursor: pointer; margin-left: 5px; }
         .error-message { color: var(--danger); font-size: 12px; margin-top: 10px; padding: 8px; background: rgba(248,81,73,0.1); border-radius: 6px; }
         .success-message { color: var(--green); font-size: 12px; margin-top: 10px; padding: 8px; background: rgba(46,160,67,0.1); border-radius: 6px; }
-        .status-badge { font-size: 11px; color: var(--muted); margin-top: 12px; padding: 8px; background: var(--bubble); border-radius: 6px; }
+        .status-badge { font-size: 11px; color: var(--muted); margin-top: 12px; padding: 8px; background: var(--bubble); border-radius: 6px; display: flex; align-items: center; justify-content: center; gap: 6px; }
+        .status-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--green); display: inline-block; animation: pulse 1.5s infinite; }
+        .status-dot.offline { background: var(--danger); animation: none; }
+        @keyframes pulse { 0%, 100% { opacity: 1; } 50% { opacity: 0.4; } }
         .user-info { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
         .active-chat { border-left: 3px solid var(--accent) !important; background: #1c232c !important; }
         .sync-indicator { font-size: 10px; color: var(--green); margin-left: 10px; }
@@ -50,10 +57,13 @@
 <div id="gate">
     <div class="card" id="view-choice">
         <div class="logo">⚡ SKYNX</div>
-        <div class="subtitle">Shy-ng-ks · Google Cloud</div>
+        <div class="subtitle">Shy-ng-ks · Supabase + GitHub</div>
         <button class="btn" onclick="setView('login')">Login</button>
         <button class="btn btn-sec" onclick="setView('register')">Register</button>
-        <div id="start-status" class="status-badge">⚡ Connected</div>
+        <div id="start-status" class="status-badge">
+            <span class="status-dot" id="start-dot"></span>
+            <span id="start-status-text">Connecting...</span>
+        </div>
     </div>
 
     <div class="card hidden" id="view-login">
@@ -63,6 +73,10 @@
         <div id="login-error" class="error-message hidden"></div>
         <button class="btn" onclick="handleAuth('login')">Enter Skynx</button>
         <button class="btn btn-sec" onclick="setView('choice')">Back</button>
+        <div id="login-status" class="status-badge">
+            <span class="status-dot" id="login-dot"></span>
+            <span id="login-status-text">Connecting...</span>
+        </div>
     </div>
 
     <div class="card hidden" id="view-register">
@@ -75,12 +89,16 @@
         <div id="register-success" class="success-message hidden"></div>
         <button class="btn" onclick="handleAuth('register')" style="background:var(--green);">Create Account</button>
         <button class="btn btn-sec" onclick="setView('choice')">Back</button>
+        <div id="register-status" class="status-badge">
+            <span class="status-dot" id="register-dot"></span>
+            <span id="register-status-text">Connecting...</span>
+        </div>
     </div>
 </div>
 
 <div class="sidebar">
     <div class="sidebar-section">
-        <div class="sidebar-header">👥 FRIENDS <span class="sync-indicator" id="sync-status">🔄 Live</span></div>
+        <div class="sidebar-header">👥 FRIENDS <span class="sync-indicator" id="sync-status">🟢 Live</span></div>
         <div id="friend-list"></div>
         <input type="text" id="add-friend-input" placeholder="Add friend (username)" style="margin-top: 10px;">
         <button class="btn" onclick="sendFriendRequest()" style="padding: 8px; margin-top: 5px;">Send Request</button>
@@ -108,28 +126,84 @@
 </div>
 
 <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbyKeXXHpzPwFv_l2adFIAqDqMj5JGKQyfUQioDislpLfFY8rBqWjuA54ScCkKvPbol5/exec";
+    // Supabase Config
+    const SUPABASE_URL = "https://rnwfbwpimaapmhnchoyx.supabase.co";
+    const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InJud2Zid3BpbWFhcG1obmNob3l4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzU3NjI1NDAsImV4cCI6MjA5MTMzODU0MH0.U7yWKcufQZU6Uo7Sf_Sv8cEsXKOkJwfOoinJM3couv0";
+    
+    // GitHub Config
+    const GITHUB_TOKEN = "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";
+    const REPO_API = "https://api.github.com/repos/ma13vq8-gif/School-discord-data/contents";
+    
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
     
     let state = { 
         user: null, 
         currentChat: null,
-        admins: { owner: "Skynx", admins: ["Skynx", "HesYourGamer"] }
+        admins: { owner: "Skynx", admins: ["Skynx", "HesYourGamer"] },
+        isConnected: false,
+        sha: {}
     };
     
-    let pollingInterval = null;
+    let messageSubscription = null;
+    let friendSubscription = null;
 
-    async function callAPI(method, params = {}) {
-        const url = new URL(API_URL);
-        url.searchParams.set('method', method);
-        Object.keys(params).forEach(key => url.searchParams.set(key, params[key]));
-        
+    // GitHub backup functions
+    async function backupToGitHub() {
         try {
-            const res = await fetch(url);
-            const text = await res.text();
-            return text ? JSON.parse(text) : {};
+            const { data: users } = await supabase.from('users').select('*');
+            const { data: messages } = await supabase.from('messages').select('*');
+            const { data: friends } = await supabase.from('friends').select('*');
+            
+            const backup = { users, messages, friends, timestamp: new Date().toISOString() };
+            
+            // Get current file to get SHA
+            const getRes = await fetch(`${REPO_API}/backup.json`, {
+                headers: { Authorization: `token ${GITHUB_TOKEN}` }
+            });
+            
+            let sha = null;
+            if (getRes.ok) {
+                const data = await getRes.json();
+                sha = data.sha;
+            }
+            
+            const body = { message: "Backup", content: btoa(unescape(encodeURIComponent(JSON.stringify(backup, null, 2)))) };
+            if (sha) body.sha = sha;
+            
+            await fetch(`${REPO_API}/backup.json`, {
+                method: 'PUT',
+                headers: { Authorization: `token ${GITHUB_TOKEN}`, 'Content-Type': 'application/json' },
+                body: JSON.stringify(body)
+            });
+            
+            console.log('✅ Backed up to GitHub');
         } catch(e) {
-            console.error('API Error:', e);
-            return { error: 'Connection failed' };
+            console.warn('⚠️ GitHub backup failed:', e);
+        }
+    }
+
+    function updateConnectionStatus(connected) {
+        state.isConnected = connected;
+        const dots = ['start-dot', 'login-dot', 'register-dot'];
+        const texts = ['start-status-text', 'login-status-text', 'register-status-text'];
+        
+        dots.forEach(id => {
+            const dot = document.getElementById(id);
+            if (dot) dot.className = connected ? 'status-dot' : 'status-dot offline';
+        });
+        
+        texts.forEach(id => {
+            const text = document.getElementById(id);
+            if (text) text.textContent = connected ? 'Connected' : 'Offline';
+        });
+    }
+
+    async function checkConnection() {
+        try {
+            const { error } = await supabase.from('users').select('count', { count: 'exact', head: true });
+            updateConnectionStatus(!error);
+        } catch(e) {
+            updateConnectionStatus(false);
         }
     }
 
@@ -139,55 +213,13 @@
         document.getElementById('login-error').classList.add('hidden');
         document.getElementById('register-error').classList.add('hidden');
         document.getElementById('register-success').classList.add('hidden');
+        checkConnection();
     }
 
     function getUserTag(username) {
         if (username === state.admins.owner) return '<span class="owner-tag">[OWNER]</span>';
         if (state.admins.admins.includes(username)) return '<span class="admin-tag">[ADMIN]</span>';
         return '';
-    }
-
-    async function handleAuth(mode) {
-        if (mode === 'register') {
-            const u = document.getElementById('r-u').value.trim();
-            const p = document.getElementById('r-p').value;
-            const age = parseInt(document.getElementById('r-age').value);
-            const name = document.getElementById('r-name').value.trim();
-            
-            if (!u || !p || !age) { 
-                showError('register-error', 'All fields are required');
-                return; 
-            }
-            if (u.length < 3) { showError('register-error', 'Username too short'); return; }
-            if (p.length < 4) { showError('register-error', 'Password too short'); return; }
-            if (age < 5) { showError('register-error', 'Must be 5+'); return; }
-            
-            const result = await callAPI('register', { username: u, password: p, age, displayName: name });
-            
-            if (result.error) {
-                showError('register-error', result.error);
-                return;
-            }
-            
-            state.user = u;
-            showSuccess('register-success', 'Account created!');
-            setTimeout(() => launch(), 500);
-        } else {
-            const u = document.getElementById('l-u').value.trim();
-            const p = document.getElementById('l-p').value;
-            
-            if (!u || !p) { showError('login-error', 'Enter username and password'); return; }
-            
-            const result = await callAPI('login', { username: u, password: p });
-            
-            if (result.error) {
-                showError('login-error', result.error);
-                return;
-            }
-            
-            state.user = u;
-            launch();
-        }
     }
 
     function showError(id, msg) {
@@ -202,47 +234,106 @@
         el.classList.remove('hidden');
     }
 
+    async function handleAuth(mode) {
+        if (!state.isConnected) {
+            const msg = 'No connection';
+            mode === 'register' ? showError('register-error', msg) : showError('login-error', msg);
+            return;
+        }
+
+        if (mode === 'register') {
+            const u = document.getElementById('r-u').value.trim();
+            const p = document.getElementById('r-p').value;
+            const age = parseInt(document.getElementById('r-age').value);
+            const name = document.getElementById('r-name').value.trim();
+            
+            if (!u || !p || !age) { showError('register-error', 'All fields required'); return; }
+            if (age < 5) { showError('register-error', 'Must be 5+'); return; }
+            
+            const { data: existing } = await supabase.from('users').select('username').eq('username', u).single();
+            if (existing) { showError('register-error', 'Username exists'); return; }
+            
+            const { error } = await supabase.from('users').insert([{ username: u, password: p, age, display_name: name || u }]);
+            if (error) { showError('register-error', error.message); return; }
+            
+            state.user = u;
+            showSuccess('register-success', 'Account created!');
+            setTimeout(() => launch(), 500);
+        } else {
+            const u = document.getElementById('l-u').value.trim();
+            const p = document.getElementById('l-p').value;
+            
+            if (!u || !p) { showError('login-error', 'Enter username and password'); return; }
+            
+            const { data: user, error } = await supabase.from('users').select('*').eq('username', u).eq('password', p).single();
+            if (error || !user) { showError('login-error', 'Invalid credentials'); return; }
+            
+            state.user = u;
+            launch();
+        }
+    }
+
     function launch() {
         document.getElementById('gate').style.opacity = '0';
         setTimeout(() => document.getElementById('gate').classList.add('hidden'), 300);
         document.getElementById('display-user').innerText = state.user;
         document.getElementById('user-tag').innerHTML = getUserTag(state.user);
         
-        startPolling();
+        setupRealtime();
         refreshUI();
+        
+        // Backup every 5 minutes
+        setInterval(backupToGitHub, 300000);
+        backupToGitHub(); // Initial backup
     }
 
-    function startPolling() {
-        if (pollingInterval) clearInterval(pollingInterval);
-        pollingInterval = setInterval(refreshUI, 1500);
+    function setupRealtime() {
+        // Subscribe to new messages
+        messageSubscription = supabase
+            .channel('messages')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'messages' }, () => {
+                if (state.currentChat) renderMessages();
+            })
+            .subscribe();
+        
+        // Subscribe to friend changes
+        friendSubscription = supabase
+            .channel('friends')
+            .on('postgres_changes', { event: '*', schema: 'public', table: 'friends' }, () => {
+                refreshUI();
+            })
+            .subscribe();
     }
 
     async function refreshUI() {
         if (!state.user) return;
-        
-        const result = await callAPI('getAllData', { user: state.user });
-        
-        if (result.error) return;
-        
-        updateFriendsList(result.friends || []);
-        updateRequestList(result.requests || []);
+        await updateFriendsList();
+        await updateRequestList();
         if (state.currentChat) await renderMessages();
     }
 
     async function renderMessages() {
         const log = document.getElementById('log');
-        const result = await callAPI('getMessages', { user: state.user, chatWith: state.currentChat });
         
-        if (result.error) return;
+        const { data: messages, error } = await supabase
+            .from('messages')
+            .select('*')
+            .or(`from_user.eq.${state.user},to_user.eq.${state.user}`)
+            .order('created_at', { ascending: true });
         
-        const messages = result.messages || [];
+        if (error) return;
         
-        if (messages.length === 0) {
+        const chatMessages = messages.filter(m => 
+            (m.from_user === state.user && m.to_user === state.currentChat) ||
+            (m.from_user === state.currentChat && m.to_user === state.user)
+        );
+        
+        if (chatMessages.length === 0) {
             log.innerHTML = `<div style="color:var(--muted); text-align:center; padding:40px;">No messages yet. Say hello!</div>`;
         } else {
-            log.innerHTML = messages.map(m => {
-                const tag = getUserTag(m.from);
-                return `<div class="msg-bubble"><b>${m.from}${tag}:</b><br>${escapeHtml(m.text)}</div>`;
+            log.innerHTML = chatMessages.map(m => {
+                const tag = getUserTag(m.from_user);
+                return `<div class="msg-bubble"><b>${m.from_user}${tag}:</b><br>${escapeHtml(m.text)}</div>`;
             }).join('');
         }
         log.scrollTop = log.scrollHeight;
@@ -267,30 +358,48 @@
         renderMessages();
     }
 
-    function updateFriendsList(friends) {
+    async function updateFriendsList() {
         const container = document.getElementById('friend-list');
         
-        if (friends.length === 0) {
+        const { data: friends, error } = await supabase
+            .from('friends')
+            .select('*')
+            .or(`user1.eq.${state.user},user2.eq.${state.user}`)
+            .eq('status', 'accepted');
+        
+        if (error) return;
+        
+        const friendList = friends.map(f => f.user1 === state.user ? f.user2 : f.user1);
+        
+        if (friendList.length === 0) {
             container.innerHTML = `<div style="color:var(--muted); font-size:12px; padding:8px;">No friends yet</div>`;
         } else {
-            container.innerHTML = friends.map(f => 
+            container.innerHTML = friendList.map(f => 
                 `<div class="friend-item" onclick="switchChat('${f}')">💬 ${f}</div>`
             ).join('');
         }
     }
 
-    function updateRequestList(requests) {
+    async function updateRequestList() {
         const container = document.getElementById('request-list');
+        
+        const { data: requests, error } = await supabase
+            .from('friends')
+            .select('*')
+            .eq('user2', state.user)
+            .eq('status', 'pending');
+        
+        if (error) return;
         
         if (requests.length === 0) {
             container.innerHTML = `<div style="color:var(--muted); font-size:12px; padding:8px;">No pending requests</div>`;
         } else {
             container.innerHTML = requests.map(r => 
                 `<div class="request-item">
-                    <span>👤 ${r}</span>
+                    <span>👤 ${r.user1}</span>
                     <span>
-                        <button class="badge" onclick="acceptFriend('${r}')" style="background:var(--green);">Accept</button>
-                        <button class="badge" onclick="declineFriend('${r}')" style="background:var(--danger);">Decline</button>
+                        <button class="badge" onclick="acceptFriend('${r.id}', '${r.user1}')" style="background:var(--green);">Accept</button>
+                        <button class="badge" onclick="declineFriend('${r.id}')" style="background:var(--danger);">Decline</button>
                     </span>
                 </div>`
             ).join('');
@@ -305,26 +414,33 @@
         if (!target) { errorEl.textContent = '❌ Enter a username'; errorEl.classList.remove('hidden'); return; }
         if (target === state.user) { errorEl.textContent = "❌ Can't friend yourself"; errorEl.classList.remove('hidden'); return; }
         
-        const result = await callAPI('sendFriendRequest', { from: state.user, to: target });
+        const { data: targetUser } = await supabase.from('users').select('username').eq('username', target).single();
+        if (!targetUser) { errorEl.textContent = '❌ User not found'; errorEl.classList.remove('hidden'); return; }
         
-        if (result.error) {
-            errorEl.textContent = '❌ ' + result.error;
+        const { data: existing } = await supabase.from('friends').select('*')
+            .or(`and(user1.eq.${state.user},user2.eq.${target}),and(user1.eq.${target},user2.eq.${state.user})`);
+        
+        if (existing.length > 0) {
+            errorEl.textContent = '❌ Already friends or request pending';
             errorEl.classList.remove('hidden');
             return;
         }
+        
+        const { error } = await supabase.from('friends').insert([{ user1: state.user, user2: target, status: 'pending' }]);
+        if (error) { errorEl.textContent = '❌ ' + error.message; errorEl.classList.remove('hidden'); return; }
         
         errorEl.classList.add('hidden');
         input.value = '';
         refreshUI();
     }
 
-    async function acceptFriend(fromUser) {
-        await callAPI('acceptFriend', { user: state.user, fromUser: fromUser });
+    async function acceptFriend(requestId, fromUser) {
+        await supabase.from('friends').update({ status: 'accepted' }).eq('id', requestId);
         refreshUI();
     }
 
-    async function declineFriend(fromUser) {
-        await callAPI('declineFriend', { user: state.user, fromUser: fromUser });
+    async function declineFriend(requestId) {
+        await supabase.from('friends').delete().eq('id', requestId);
         refreshUI();
     }
 
@@ -335,13 +451,19 @@
         const val = input.value.trim();
         if (!val) return;
         
-        await callAPI('sendMessage', { from: state.user, to: state.currentChat, text: val });
+        await supabase.from('messages').insert([{
+            from_user: state.user,
+            to_user: state.currentChat,
+            text: val
+        }]);
+        
         input.value = '';
         renderMessages();
     }
 
     function logout() {
-        if (pollingInterval) clearInterval(pollingInterval);
+        if (messageSubscription) messageSubscription.unsubscribe();
+        if (friendSubscription) friendSubscription.unsubscribe();
         state.user = null;
         state.currentChat = null;
         document.getElementById('gate').style.opacity = '1';
@@ -352,6 +474,7 @@
         setView('choice');
     }
 
+    checkConnection();
     setView('choice');
 </script>
 </body>
