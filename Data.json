@@ -4,7 +4,7 @@
       "version": "6.0.0-AI",
       "codename": "Broski-Neural",
       "deployment_date": "2026-04-09",
-      "engine": "GitHub-API-v3-OpenRouter",
+      "engine": "GitHub-API-v3-HuggingFace",
       "stability_index": 0.98
     },
     "age_restrictions": {
@@ -15,12 +15,11 @@
       "platform_restriction_message": "You must be at least 5 years old to use Skynx."
     },
     "ai_integration": {
-      "primary_provider": "openrouter",
-      "model": "google/gemma-3b-it:free",
-      "api_key": "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",
+      "primary_provider": "huggingface",
+      "model": "mistralai/Mistral-7B-Instruct-v0.3",
       "context_window": 6,
       "temperature": 0.7,
-      "max_tokens": 150,
+      "max_tokens": 2000,
       "system_prompt": "You are SkynxAI in Skynx. Be concise, witty, and helpful. Casual tone."
     },
     "security_protocols": {
@@ -69,13 +68,13 @@
         "timestamp": "2026-04-09T10:00:00Z",
         "event": "AI Core Integration",
         "status": "Success",
-        "details": "OpenRouter API linked. SkynxAI active."
+        "details": "Hugging Face API linked. SkynxAI active."
       },
       {
         "timestamp": "2026-04-09T12:00:00Z",
-        "event": "Token Update",
-        "status": "Verified",
-        "details": "API key validated."
+        "event": "Provider Switch",
+        "status": "Complete",
+        "details": "Migrated from OpenRouter to Hugging Face."
       },
       {
         "timestamp": "2026-04-09T14:30:00Z",
