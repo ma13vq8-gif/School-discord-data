@@ -4,8 +4,8 @@
       "version": "6.0.0-AI",
       "codename": "Broski-Neural",
       "deployment_date": "2026-04-09",
-      "engine": "GitHub-API-v3-HuggingFace",
-      "stability_index": 0.98
+      "engine": "GitHub-API-v3-Groq",
+      "stability_index": 0.99
     },
     "age_restrictions": {
       "platform_minimum_age": 5,
@@ -15,9 +15,8 @@
       "platform_restriction_message": "You must be at least 5 years old to use Skynx."
     },
     "ai_integration": {
-      "primary_provider": "huggingface",
-      "model": "mistralai/Mistral-7B-Instruct-v0.3",
-      "token_url": "https://pastebin.com/raw/gwzfr1Bc",
+      "primary_provider": "groq",
+      "model": "llama3-8b-8192",
       "context_window": 6,
       "temperature": 0.7,
       "max_tokens": 2000,
@@ -36,7 +35,7 @@
         "app_name": "Skynx",
         "bot_name": "SkynxAI",
         "pronunciation": "Shy-ng-ks",
-        "primary_color": "#5865f2",
+        "primary_color": "#f50",
         "secondary_color": "#313338",
         "success_color": "#23a559",
         "danger_color": "#ed4245"
@@ -53,7 +52,7 @@
       "context_memory": true,
       "mood_swing_probability": 0.0,
       "greeting_variants": [
-        "SkynxAI online. Neural core active.",
+        "SkynxAI online. Groq core active.",
         "Connection established. What's the move?",
         "Encryption verified. Ready for input.",
         "Broski protocol engaged. Type away."
@@ -69,13 +68,13 @@
         "timestamp": "2026-04-09T10:00:00Z",
         "event": "AI Core Integration",
         "status": "Success",
-        "details": "Hugging Face API linked via secure Pastebin."
+        "details": "Groq API linked. SkynxAI active."
       },
       {
         "timestamp": "2026-04-09T12:00:00Z",
-        "event": "Token Security",
-        "status": "Verified",
-        "details": "Token stored externally, fetched at runtime."
+        "event": "Provider Migration",
+        "status": "Complete",
+        "details": "Migrated from Hugging Face to Groq."
       },
       {
         "timestamp": "2026-04-09T14:30:00Z",
@@ -93,7 +92,7 @@
     "file_architecture": {
       "Users.json": "User registry",
       "Messages.json": "Message storage",
-      "BotLogic.json": "AI configuration and fallbacks",
+      "BotLogic.json": "AI configuration and keys",
       "Friends.json": "Social graph",
       "blocked_words.json": "Profanity filter source"
     },
