@@ -1,0 +1,10 @@
+{
+  "name": "Neural-Bot",
+  "pfp": "https://cdn-icons-png.flaticon.com/512/4712/4712035.png",
+  "brain": {
+    "hi": "System online. Secure link established.",
+    "status": "All private nodes are operational.",
+    "help": "You can register an account, add friends, and change your PFP in settings.",
+    "who is the goat": "The person reading this message."
+  }
+}
