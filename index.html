@@ -3,165 +3,334 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>SkynxAI · Groq Test</title>
+    <title>SKYNX · Shy-ng-ks</title>
     <style>
+        :root { 
+            --bg: #0d1117; --sidebar: #0a0c10; --accent: #5865f2; --text: #e6edf3; 
+            --muted: #7d8590; --danger: #f85149; --green: #2ea043; --bubble: #161b22; --border: #21262d;
+            --owner: #f50; --admin: #ff8c00;
+        }
         * { box-sizing: border-box; margin: 0; padding: 0; }
-        body {
-            background: #0d1117;
-            color: #e6edf3;
-            font-family: 'Segoe UI', sans-serif;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            height: 100vh;
-        }
-        .container {
-            width: 100%;
-            max-width: 600px;
-            height: 90vh;
-            background: #0a0c10;
-            border-radius: 20px;
-            border: 1px solid #21262d;
-            display: flex;
-            flex-direction: column;
-            padding: 20px;
-        }
-        h2 {
-            background: linear-gradient(135deg, #f50, #ff8c00);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 15px;
-        }
-        .chat {
-            flex: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-        .msg {
-            padding: 10px 15px;
-            border-radius: 12px;
-            max-width: 85%;
-            word-break: break-word;
-        }
-        .user { background: #f50; align-self: flex-end; }
-        .bot { background: #161b22; border-left: 3px solid #f50; align-self: flex-start; }
-        .error { background: rgba(248,81,73,0.15); color: #f85149; }
-        .input-area { display: flex; gap: 10px; }
-        input {
-            flex: 1;
-            padding: 14px;
-            background: #161b22;
-            border: 1px solid #30363d;
-            border-radius: 30px;
-            color: white;
-            outline: none;
-        }
-        button {
-            padding: 14px 28px;
-            background: #f50;
-            border: none;
-            border-radius: 30px;
-            color: white;
-            font-weight: bold;
-            cursor: pointer;
-        }
-        button:disabled { opacity: 0.5; }
-        .status {
-            font-size: 11px;
-            color: #7d8590;
-            margin-top: 10px;
-            text-align: center;
-        }
+        body { background: var(--bg); color: var(--text); font-family: 'Segoe UI', sans-serif; display: flex; height: 100vh; overflow: hidden; }
+        #gate { position: fixed; inset: 0; background: var(--bg); z-index: 9999; display: flex; align-items: center; justify-content: center; transition: opacity 0.3s; }
+        .card { background: var(--sidebar); padding: 30px; border-radius: 16px; width: 380px; text-align: center; border: 1px solid var(--border); }
+        .hidden { display: none !important; }
+        .logo { font-size: 36px; font-weight: 800; background: linear-gradient(135deg, var(--accent), #7983f5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; margin-bottom: 8px; }
+        .subtitle { color: var(--muted); font-size: 13px; margin-bottom: 24px; }
+        input { width: 100%; padding: 12px; margin: 8px 0; background: var(--bg); border: 1px solid var(--border); border-radius: 8px; color: white; outline: none; }
+        input:focus { border-color: var(--accent); }
+        .btn { width: 100%; padding: 12px; background: var(--accent); border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .btn-sec { background: var(--bubble); border: 1px solid var(--border); }
+        .sidebar { width: 280px; background: var(--sidebar); border-right: 1px solid var(--border); display: flex; flex-direction: column; overflow-y: auto; }
+        .sidebar-section { padding: 16px; border-bottom: 1px solid var(--border); }
+        .sidebar-header { font-size: 12px; font-weight: 700; color: var(--accent); text-transform: uppercase; margin-bottom: 12px; }
+        .main { flex-grow: 1; display: flex; flex-direction: column; background: var(--bg); }
+        .chat-header { padding: 16px 20px; border-bottom: 1px solid var(--border); font-weight: bold; display: flex; align-items: center; gap: 10px; }
+        .chat-log { flex-grow: 1; padding: 20px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .msg-bubble { background: var(--bubble); padding: 12px 16px; border-radius: 12px; max-width: 80%; width: fit-content; border: 1px solid var(--border); word-break: break-word; }
+        .msg-bubble b { font-weight: 600; margin-right: 8px; }
+        .owner-tag { color: var(--owner); font-size: 10px; font-weight: bold; margin-left: 5px; }
+        .admin-tag { color: var(--admin); font-size: 10px; font-weight: bold; margin-left: 5px; }
+        .input-area { padding: 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; }
+        .input-area input { flex: 1; margin: 0; }
+        .friend-item { padding: 10px 12px; margin-bottom: 4px; background: var(--bubble); border-radius: 6px; display: flex; align-items: center; justify-content: space-between; cursor: pointer; }
+        .friend-item:hover { background: #1c232c; }
+        .request-item { padding: 10px 12px; margin-bottom: 4px; background: var(--bubble); border-radius: 6px; display: flex; align-items: center; justify-content: space-between; }
+        .badge { background: var(--accent); color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; border: none; cursor: pointer; margin-left: 5px; }
+        .status-badge { font-size: 11px; color: var(--muted); margin-top: 12px; padding: 8px; background: var(--bubble); border-radius: 6px; }
+        .user-info { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
+        .active-chat { border-left: 3px solid var(--accent) !important; background: #1c232c !important; }
     </style>
 </head>
 <body>
-<div class="container">
-    <h2>⚡ SkynxAI · Groq</h2>
-    <div class="chat" id="chat">
-        <div class="msg bot">Ready. Using Groq + Llama 3</div>
+
+<div id="gate">
+    <div class="card" id="view-choice">
+        <div class="logo">⚡ SKYNX</div>
+        <div class="subtitle">Shy-ng-ks · Private Network</div>
+        <button class="btn" onclick="setView('login')">Login</button>
+        <button class="btn btn-sec" onclick="setView('register')">Register</button>
+        <div id="debug" class="status-badge">⚡ System Ready</div>
     </div>
-    <div class="input-area">
-        <input type="text" id="msgInput" placeholder="Say something..." onkeypress="if(event.key==='Enter') send()">
-        <button id="sendBtn" onclick="send()">Send</button>
+
+    <div class="card hidden" id="view-login">
+        <h3 style="color:var(--accent);">Login</h3>
+        <input type="text" id="l-u" placeholder="Username" autocomplete="off">
+        <input type="password" id="l-p" placeholder="Password" autocomplete="off">
+        <button class="btn" onclick="handleAuth('login')">Enter</button>
+        <button class="btn btn-sec" onclick="setView('choice')">Back</button>
     </div>
-    <div class="status" id="status">Model: llama3-8b-8192</div>
+
+    <div class="card hidden" id="view-register">
+        <h3 style="color:var(--green);">Register</h3>
+        <input type="text" id="r-u" placeholder="Username*">
+        <input type="password" id="r-p" placeholder="Password*">
+        <input type="number" id="r-age" placeholder="Age* (min 5)">
+        <input type="text" id="r-name" placeholder="Display Name">
+        <button class="btn" onclick="handleAuth('register')" style="background:var(--green);">Create</button>
+        <button class="btn btn-sec" onclick="setView('choice')">Back</button>
+    </div>
+</div>
+
+<div class="sidebar">
+    <div class="sidebar-section">
+        <div class="sidebar-header">👥 FRIENDS</div>
+        <div id="friend-list"></div>
+        <input type="text" id="add-friend-input" placeholder="Add friend (username)" style="margin-top: 10px;">
+        <button class="btn" onclick="sendFriendRequest()" style="padding: 8px; margin-top: 5px;">Send Request</button>
+    </div>
+    <div class="sidebar-section">
+        <div class="sidebar-header">📨 REQUESTS</div>
+        <div id="request-list"></div>
+    </div>
+    <div style="margin-top: auto; padding: 16px; border-top: 1px solid var(--border);">
+        <div class="user-info">
+            <span>🟢</span><span id="display-user">Offline</span><span id="user-tag"></span>
+        </div>
+        <button class="btn btn-sec" onclick="logout()" style="padding: 8px;">Logout</button>
+    </div>
+</div>
+
+<div class="main">
+    <div class="chat-header" id="chat-header">💬 Select a friend to chat</div>
+    <div id="log" class="chat-log"></div>
+    <div id="input-container" class="input-area hidden">
+        <input type="text" id="msg-in" placeholder="Type a message..." onkeypress="if(event.key==='Enter') sendMessage()">
+        <button class="btn" onclick="sendMessage()" style="width: auto; margin: 0;">Send</button>
+    </div>
 </div>
 
 <script>
-    const GROQ_KEY = "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";
+    // Load data from localStorage
+    let STORAGE = JSON.parse(localStorage.getItem('skynx_storage')) || {
+        users: [],
+        messages: [],
+        friends: { friendships: {} },
+        admins: { owner: "Skynx", admins: ["Skynx", "HesYourGamer"] }
+    };
     
-    let history = [];
-    let waiting = false;
-    
-    const chat = document.getElementById('chat');
-    const input = document.getElementById('msgInput');
-    const btn = document.getElementById('sendBtn');
-    const status = document.getElementById('status');
-    
-    function add(text, type) {
-        const msg = document.createElement('div');
-        msg.className = `msg ${type}`;
-        msg.textContent = text;
-        chat.appendChild(msg);
-        chat.scrollTop = chat.scrollHeight;
+    function saveStorage() {
+        localStorage.setItem('skynx_storage', JSON.stringify(STORAGE));
     }
     
-    async function send() {
-        const text = input.value.trim();
-        if (!text || waiting) return;
-        
-        input.value = '';
-        waiting = true;
-        btn.disabled = true;
-        status.textContent = 'Thinking...';
-        
-        add(text, 'user');
-        history.push({ role: "user", content: text });
-        
+    let state = { 
+        user: null, 
+        currentChat: null
+    };
+
+    function setView(v) { 
+        ['choice','login','register'].forEach(id => document.getElementById('view-'+id).classList.add('hidden')); 
+        document.getElementById('view-'+v).classList.remove('hidden'); 
+        document.getElementById('debug').innerText = '⚡ System Ready';
+    }
+
+    function getUserTag(username) {
+        if (username === STORAGE.admins.owner) return '<span class="owner-tag">[OWNER]</span>';
+        if (STORAGE.admins.admins.includes(username)) return '<span class="admin-tag">[ADMIN]</span>';
+        return '';
+    }
+
+    function handleAuth(mode) {
+        const debug = document.getElementById('debug');
         try {
-            const messages = [
-                { role: "system", content: "You are SkynxAI. Be friendly and concise." },
-                ...history.slice(-5)
-            ];
-            
-            const res = await fetch("https://api.groq.com/openai/v1/chat/completions", {
-                method: "POST",
-                headers: {
-                    "Authorization": `Bearer ${GROQ_KEY}`,
-                    "Content-Type": "application/json"
-                },
-                body: JSON.stringify({
-                    model: "llama3-8b-8192",
-                    messages: messages,
-                    temperature: 0.7,
-                    max_tokens: 300
-                })
-            });
-            
-            if (!res.ok) {
-                const errText = await res.text();
-                throw new Error(`HTTP ${res.status}: ${errText}`);
+            if (mode === 'register') {
+                const u = document.getElementById('r-u').value.trim();
+                const p = document.getElementById('r-p').value;
+                const age = parseInt(document.getElementById('r-age').value);
+                const name = document.getElementById('r-name').value.trim();
+                if (!u || !p || !age) throw new Error("All fields required");
+                if (age < 5) throw new Error("Must be 5+");
+                if (STORAGE.users.find(x => x.u === u)) throw new Error("Username exists");
+                STORAGE.users.push({ u, p, age, name: name || u });
+                saveStorage();
+                state.user = u;
+            } else {
+                const u = document.getElementById('l-u').value.trim();
+                const p = document.getElementById('l-p').value;
+                const found = STORAGE.users.find(x => x.u === u && x.p === p);
+                if (!found) throw new Error("Invalid credentials");
+                state.user = u;
             }
-            
-            const data = await res.json();
-            const reply = data.choices[0].message.content;
-            
-            add(reply, 'bot');
-            history.push({ role: "assistant", content: reply });
-            status.textContent = 'Connected (Llama 3)';
-            
-        } catch(e) {
-            add(`Error: ${e.message}`, 'error');
-            status.textContent = `Failed: ${e.message}`;
-        } finally {
-            waiting = false;
-            btn.disabled = false;
-            input.focus();
+            launch();
+        } catch(e) { debug.innerText = '❌ ' + e.message; }
+    }
+
+    function launch() {
+        document.getElementById('gate').style.opacity = '0';
+        setTimeout(() => document.getElementById('gate').classList.add('hidden'), 300);
+        document.getElementById('display-user').innerText = state.user;
+        document.getElementById('user-tag').innerHTML = getUserTag(state.user);
+        refreshUI();
+        setInterval(refreshUI, 2000);
+    }
+
+    function refreshUI() {
+        if (!state.user) return;
+        updateFriendsList();
+        updateRequestList();
+        if (state.currentChat) renderMessages();
+    }
+
+    function renderMessages() {
+        const log = document.getElementById('log');
+        const chat = STORAGE.messages.filter(m => 
+            (m.to === state.currentChat && m.from === state.user) || 
+            (m.from === state.currentChat && m.to === state.user)
+        );
+        
+        if (chat.length === 0) {
+            log.innerHTML = `<div style="color:var(--muted); text-align:center; padding:40px;">No messages yet. Say hello!</div>`;
+        } else {
+            log.innerHTML = chat.map(m => {
+                const tag = getUserTag(m.from);
+                return `<div class="msg-bubble"><b>${m.from}${tag}:</b><br>${escapeHtml(m.text)}</div>`;
+            }).join('');
+        }
+        log.scrollTop = log.scrollHeight;
+    }
+    
+    function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+    }
+
+    function switchChat(target) {
+        state.currentChat = target;
+        document.getElementById('chat-header').innerHTML = `💬 Chatting with ${target}`;
+        document.getElementById('input-container').classList.remove('hidden');
+        
+        // Highlight active chat
+        document.querySelectorAll('.friend-item').forEach(el => {
+            el.classList.remove('active-chat');
+            if (el.textContent.includes(target)) el.classList.add('active-chat');
+        });
+        
+        renderMessages();
+    }
+
+    function updateFriendsList() {
+        const container = document.getElementById('friend-list');
+        const userFriends = STORAGE.friends?.friendships?.[state.user] || [];
+        
+        if (userFriends.length === 0) {
+            container.innerHTML = `<div style="color:var(--muted); font-size:12px; padding:8px;">No friends yet</div>`;
+        } else {
+            container.innerHTML = userFriends.map(f => 
+                `<div class="friend-item" onclick="switchChat('${f}')">💬 ${f}</div>`
+            ).join('');
         }
     }
+
+    function updateRequestList() {
+        const container = document.getElementById('request-list');
+        const requests = STORAGE.friends?.friendships?.[`__requests__${state.user}`] || [];
+        
+        if (requests.length === 0) {
+            container.innerHTML = `<div style="color:var(--muted); font-size:12px; padding:8px;">No pending requests</div>`;
+        } else {
+            container.innerHTML = requests.map(r => 
+                `<div class="request-item">
+                    <span>👤 ${r}</span>
+                    <span>
+                        <button class="badge" onclick="acceptFriend('${r}')" style="background:var(--green);">Accept</button>
+                        <button class="badge" onclick="declineFriend('${r}')" style="background:var(--danger);">Decline</button>
+                    </span>
+                </div>`
+            ).join('');
+        }
+    }
+
+    function sendFriendRequest() {
+        const input = document.getElementById('add-friend-input');
+        const target = input.value.trim();
+        
+        if (!target) { alert("Enter a username"); return; }
+        if (target === state.user) { alert("You can't friend yourself"); return; }
+        
+        const targetUser = STORAGE.users.find(u => u.u === target);
+        if (!targetUser) { alert("User not found"); return; }
+        
+        // Check if already friends
+        const userFriends = STORAGE.friends.friendships[state.user] || [];
+        if (userFriends.includes(target)) { alert("Already friends!"); input.value = ''; return; }
+        
+        // Check if request already sent
+        const existingRequests = STORAGE.friends.friendships[`__requests__${target}`] || [];
+        if (existingRequests.includes(state.user)) { alert("Request already sent!"); input.value = ''; return; }
+        
+        if (!STORAGE.friends.friendships) STORAGE.friends.friendships = {};
+        if (!STORAGE.friends.friendships[`__requests__${target}`]) {
+            STORAGE.friends.friendships[`__requests__${target}`] = [];
+        }
+        
+        STORAGE.friends.friendships[`__requests__${target}`].push(state.user);
+        saveStorage();
+        
+        input.value = '';
+        alert(`Friend request sent to ${target}!`);
+        refreshUI();
+    }
+
+    function acceptFriend(fromUser) {
+        if (!STORAGE.friends.friendships) STORAGE.friends.friendships = {};
+        if (!STORAGE.friends.friendships[state.user]) STORAGE.friends.friendships[state.user] = [];
+        if (!STORAGE.friends.friendships[fromUser]) STORAGE.friends.friendships[fromUser] = [];
+        
+        // Add to both friends lists
+        if (!STORAGE.friends.friendships[state.user].includes(fromUser)) {
+            STORAGE.friends.friendships[state.user].push(fromUser);
+        }
+        if (!STORAGE.friends.friendships[fromUser].includes(state.user)) {
+            STORAGE.friends.friendships[fromUser].push(state.user);
+        }
+        
+        // Remove from requests
+        const requests = STORAGE.friends.friendships[`__requests__${state.user}`] || [];
+        STORAGE.friends.friendships[`__requests__${state.user}`] = requests.filter(r => r !== fromUser);
+        
+        saveStorage();
+        refreshUI();
+    }
+
+    function declineFriend(fromUser) {
+        const requests = STORAGE.friends.friendships[`__requests__${state.user}`] || [];
+        STORAGE.friends.friendships[`__requests__${state.user}`] = requests.filter(r => r !== fromUser);
+        saveStorage();
+        refreshUI();
+    }
+
+    function sendMessage() {
+        if (!state.currentChat) { alert("Select a friend first!"); return; }
+        
+        const input = document.getElementById('msg-in');
+        const val = input.value.trim();
+        if (!val) return;
+        
+        STORAGE.messages.push({ 
+            from: state.user, 
+            to: state.currentChat, 
+            text: val,
+            timestamp: Date.now()
+        });
+        
+        input.value = '';
+        saveStorage();
+        renderMessages();
+    }
+
+    function logout() {
+        state.user = null;
+        state.currentChat = null;
+        document.getElementById('gate').style.opacity = '1';
+        document.getElementById('gate').classList.remove('hidden');
+        document.getElementById('input-container').classList.add('hidden');
+        document.getElementById('chat-header').innerHTML = '💬 Select a friend to chat';
+        document.getElementById('log').innerHTML = '';
+        setView('choice');
+    }
+
+    setView('choice');
 </script>
 </body>
 </html>
