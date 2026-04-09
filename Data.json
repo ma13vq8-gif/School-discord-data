@@ -1,14 +1,28 @@
 {
   "vault": {
-    "Admin": { "pass": "123", "pfp": "https://i.imgur.com/8Km9tLL.png", "friends": [] }
+    "Admin": {
+      "pass": "123",
+      "pfp": "https://i.imgur.com/8Km9tLL.png",
+      "friends": []
+    }
   },
-  "messages": [],
+  "messages": [
+    {
+      "from": "Neural-Bot",
+      "to": "Admin",
+      "text": "System initialized. Private Vault is active.",
+      "pfp": "https://cdn-icons-png.flaticon.com/512/4712/4712035.png"
+    }
+  ],
   "botConfig": {
     "name": "Neural-Bot",
     "pfp": "https://cdn-icons-png.flaticon.com/512/4712/4712035.png",
     "brain": {
-      "hello": "Private link established. Data encrypted.",
-      "help": "Settings allow PFP changes. Friends are private."
+      "hello": "Neural link established. How can I assist?",
+      "help": "Commands: 'status', 'clear', 'version'. Check Settings for PFP updates.",
+      "status": "All systems operational. Latency: 24ms.",
+      "who is the goat": "JJfathom is the legend.",
+      "version": "Private Terminal Build v4.2.0"
     }
   }
 }
