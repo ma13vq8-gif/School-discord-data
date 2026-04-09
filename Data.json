@@ -1,15 +1,102 @@
 {
-  "vault": {},
-  "messages": [],
-  "botConfig": {
-    "name": "Neural-Bot",
-    "pfp": "https://cdn-icons-png.flaticon.com/512/4712/4712035.png",
-    "brain": {
-      "hello": "Neural link established. Encryption active.",
-      "help": "Commands: 'status', 'version'. Update your PFP in Settings.",
-      "status": "Private database 100% operational.",
-      "who is the goat": "The user currently typing is the goat.",
-      "version": "Private Hub v5.0.1"
+  "system_registry": {
+    "build_info": {
+      "version": "5.2.0-Alpha",
+      "codename": "Broski-Protocol",
+      "deployment_date": "2026-04-09",
+      "engine": "GitHub-API-v3",
+      "stability_index": 0.98
+    },
+    "security_protocols": {
+      "encryption_level": "Base64-Transcoded",
+      "private_repo_sync": true,
+      "token_protection": "Client-Side-Masked",
+      "session_timeout_ms": 3600000,
+      "max_failed_logins": 5
+    },
+    "ui_theme_engine": {
+      "active_theme": "Discord-Dark",
+      "branding": {
+        "app_name": "Private Neural Terminal",
+        "logo_url": "https://i.imgur.com/8Km9tLL.png",
+        "primary_color": "#5865f2",
+        "secondary_color": "#313338",
+        "success_color": "#23a559",
+        "danger_color": "#ed4245"
+      },
+      "css_overrides": {
+        "border_radius": "12px",
+        "font_family": "Helvetica Neue",
+        "message_spacing": "12px",
+        "sidebar_width": "240px"
+      }
+    },
+    "bot_personality_matrix": {
+      "intelligence_level": "High",
+      "context_awareness": true,
+      "mood_swing_probability": 0.05,
+      "greeting_variants": [
+        "System online. Awaiting commands.",
+        "Neural link established, broski.",
+        "Private vault accessed. Encryption active.",
+        "What's the move today?"
+      ],
+      "error_responses": [
+        "Handshake failed. Check your link.",
+        "That packet got lost in the void.",
+        "Error: Logic loop detected.",
+        "I can't do that, Dave."
+      ]
+    },
+    "server_status_logs": [
+      {
+        "timestamp": "2026-04-09T10:00:00Z",
+        "event": "System Rebirth",
+        "status": "Success",
+        "details": "Moved to multi-file sync logic."
+      },
+      {
+        "timestamp": "2026-04-09T12:00:00Z",
+        "event": "Token Update",
+        "status": "Verified",
+        "details": "ghp_...Vz integrated."
+      },
+      {
+        "timestamp": "2026-04-09T14:30:00Z",
+        "event": "Database Cleanup",
+        "status": "Complete",
+        "details": "Removed redundant admin gates."
+      },
+      {
+        "timestamp": "2026-04-09T16:00:00Z",
+        "event": "UI Refresh",
+        "status": "Active",
+        "details": "Applied Discord-Dark styling."
+      },
+      {
+        "timestamp": "2026-04-09T18:00:00Z",
+        "event": "User Growth",
+        "status": "Stable",
+        "details": "Open registration protocol active."
+      }
+    ],
+    "file_architecture": {
+      "Users.json": "Registry for all authenticated entities.",
+      "Messages.json": "Central hub for encrypted data packets.",
+      "BotLogic.json": "The core brain and response engine.",
+      "Friends.json": "Social link mapping and permissions."
+    },
+    "developer_backlog": {
+      "priority_high": "Add image upload via Base64.",
+      "priority_med": "Integrate custom emojis.",
+      "priority_low": "Add voice-to-text hooks.",
+      "bug_fixes": "Fix the 'Load Failed' ghost errors."
+    },
+    "footer_metadata": {
+      "is_functional": true,
+      "is_private": true,
+      "license": "JJfathom-Exclusive",
+      "terminal_closing_tag": "EOF-SYSTEM-STABLE"
     }
   }
 }
