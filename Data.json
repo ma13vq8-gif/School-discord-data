@@ -9,9 +9,9 @@
     },
     "age_restrictions": {
       "platform_minimum_age": 5,
-      "dm_minimum_age": 13,
+      "dm_minimum_age": 12,
       "block_dm_under_age": true,
-      "dm_restriction_message": "Direct messaging is restricted to users 13 and older.",
+      "dm_restriction_message": "Direct messaging is restricted to users 12 and older.",
       "platform_restriction_message": "You must be at least 5 years old to use Skynx."
     },
     "ai_integration": {
