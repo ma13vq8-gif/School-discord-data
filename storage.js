@@ -1,1 +1,6 @@
-https://gist.githubusercontent.com/ma13vq8-gif/276cd0c54a915587304f737f6d83ab7c/raw/95beb755977b611daf26c24c5fe92792bf3ab582/gistfile1.txt
+// SKYNX STORAGE - All data in one file
+const STORAGE = {
+  users: [{"u":"Skynx","p":".Ninjistro","age":13,"name":"Skynx_Official"}],
+  messages: [],
+  friends: {}
+};
