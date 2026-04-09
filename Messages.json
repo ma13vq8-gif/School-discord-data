@@ -13,5 +13,15 @@
     "from": "rlggf",
     "to": "Neural-Bot",
     "text": "yo"
+  },
+  {
+    "from": "rlggf",
+    "to": "Neural-Bot",
+    "text": "yo"
+  },
+  {
+    "from": "Neural-Bot",
+    "to": "rlggf",
+    "text": "What's the move today?"
   }
 ]
