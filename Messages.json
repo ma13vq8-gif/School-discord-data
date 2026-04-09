@@ -48,5 +48,10 @@
     "from": "Neural-Bot",
     "to": "rlggf",
     "text": "What's the move today?"
+  },
+  {
+    "from": "rlggf",
+    "to": "Neural-Bot",
+    "text": "idk"
   }
 ]
