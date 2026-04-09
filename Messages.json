@@ -73,5 +73,10 @@
     "from": "rlggf",
     "to": "Neural-Bot",
     "text": "help"
+  },
+  {
+    "from": "Neural-Bot",
+    "to": "rlggf",
+    "text": "You can register an account, add friends, and change your PFP in settings."
   }
 ]
