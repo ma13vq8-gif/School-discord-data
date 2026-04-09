@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SkynxAI · Test</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            background: #0d1117;
+            color: #e6edf3;
+            font-family: 'Segoe UI', sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+        }
+        .container {
+            width: 100%;
+            max-width: 600px;
+            height: 90vh;
+            background: #0a0c10;
+            border-radius: 20px;
+            border: 1px solid #21262d;
+            display: flex;
+            flex-direction: column;
+            padding: 20px;
+        }
+        h2 {
+            background: linear-gradient(135deg, #5865f2, #7983f5);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 15px;
+        }
+        .chat {
+            flex: 1;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .msg {
+            padding: 10px 15px;
+            border-radius: 12px;
+            max-width: 85%;
+            word-break: break-word;
+        }
+        .user { background: #5865f2; align-self: flex-end; }
+        .bot { background: #161b22; border-left: 3px solid #5865f2; align-self: flex-start; }
+        .error { background: rgba(248,81,73,0.15); color: #f85149; }
+        .input-area {
+            display: flex;
+            gap: 10px;
+        }
+        input {
+            flex: 1;
+            padding: 14px;
+            background: #161b22;
+            border: 1px solid #30363d;
+            border-radius: 30px;
+            color: white;
+            outline: none;
+        }
+        button {
+            padding: 14px 28px;
+            background: #5865f2;
+            border: none;
+            border-radius: 30px;
+            color: white;
+            font-weight: bold;
+            cursor: pointer;
+        }
+        button:disabled { opacity: 0.5; }
+        .status {
+            font-size: 11px;
+            color: #7d8590;
+            margin-top: 10px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h2>⚡ SkynxAI Test</h2>
+    <div class="chat" id="chat">
+        <div class="msg bot">Ready. Type a message!</div>
+    </div>
+    <div class="input-area">
+        <input type="text" id="msgInput" placeholder="Say something..." onkeypress="if(event.key==='Enter') send()">
+        <button id="sendBtn" onclick="send()">Send</button>
+    </div>
+    <div class="status" id="status">Model: Mistral-7B-Instruct</div>
+</div>
+
+<script>
+    const HF_TOKEN = "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";
+    
+    let history = [];
+    let waiting = false;
+    
+    const chat = document.getElementById('chat');
+    const input = document.getElementById('msgInput');
+    const btn = document.getElementById('sendBtn');
+    const status = document.getElementById('status');
+    
+    function add(text, type) {
+        const msg = document.createElement('div');
+        msg.className = `msg ${type}`;
+        msg.textContent = text;
+        chat.appendChild(msg);
+        chat.scrollTop = chat.scrollHeight;
+    }
+    
+    async function send() {
+        const text = input.value.trim();
+        if (!text || waiting) return;
+        
+        input.value = '';
+        waiting = true;
+        btn.disabled = true;
+        status.textContent = 'Thinking...';
+        
+        add(text, 'user');
+        history.push({ role: "user", content: text });
+        
+        try {
+            let prompt = "You are SkynxAI. Be friendly and concise.\n\n";
+            history.slice(-3).forEach(m => {
+                prompt += `${m.role === 'user' ? 'User' : 'SkynxAI'}: ${m.content}\n`;
+            });
+            prompt += "SkynxAI:";
+            
+            const res = await fetch("https://api-inference.huggingface.co/models/mistralai/Mistral-7B-Instruct-v0.3", {
+                method: "POST",
+                headers: {
+                    "Authorization": `Bearer ${HF_TOKEN}`,
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({
+                    inputs: prompt,
+                    parameters: { max_new_tokens: 300, temperature: 0.7, return_full_text: false }
+                })
+            });
+            
+            if (!res.ok) throw new Error(`HTTP ${res.status}`);
+            
+            const data = await res.json();
+            let reply = data[0]?.generated_text || "No response";
+            reply = reply.trim().split("User:")[0].split("SkynxAI:").pop().trim();
+            
+            add(reply, 'bot');
+            history.push({ role: "assistant", content: reply });
+            status.textContent = 'Connected';
+            
+        } catch(e) {
+            add(`Error: ${e.message}`, 'error');
+            status.textContent = `Failed: ${e.message}`;
+        } finally {
+            waiting = false;
+            btn.disabled = false;
+            input.focus();
+        }
+    }
+</script>
+</body>
+</html>
