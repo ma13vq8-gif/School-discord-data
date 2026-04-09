@@ -7,6 +7,13 @@
       "engine": "GitHub-API-v3-OpenRouter",
       "stability_index": 0.98
     },
+    "age_restrictions": {
+      "platform_minimum_age": 5,
+      "dm_minimum_age": 13,
+      "block_dm_under_age": true,
+      "dm_restriction_message": "Direct messaging is restricted to users 13 and older.",
+      "platform_restriction_message": "You must be at least 5 years old to use Skynx."
+    },
     "ai_integration": {
       "primary_provider": "openrouter",
       "model": "google/gemma-3b-it:free",
@@ -87,7 +94,8 @@
       "Users.json": "User registry",
       "Messages.json": "Message storage",
       "BotLogic.json": "AI configuration and fallbacks",
-      "Friends.json": "Social graph"
+      "Friends.json": "Social graph",
+      "blocked_words.json": "Profanity filter source"
     },
     "developer_backlog": {
       "priority_high": "Add conversation memory across sessions.",
