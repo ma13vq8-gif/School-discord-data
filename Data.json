@@ -5,10 +5,11 @@
     "name": "Neural-Bot",
     "pfp": "https://cdn-icons-png.flaticon.com/512/4712/4712035.png",
     "brain": {
-      "hello": "Neural link established. Welcome to the hub.",
-      "help": "Commands: 'status', 'version'. Change your PFP in Settings!",
-      "who is the goat": "The community is the goat.",
-      "status": "Private cloud is 100% operational."
+      "hello": "Neural link established. Encryption active.",
+      "help": "Commands: 'status', 'version'. Update your PFP in Settings.",
+      "status": "Private database 100% operational.",
+      "who is the goat": "The user currently typing is the goat.",
+      "version": "Private Hub v5.0.1"
     }
   }
 }
