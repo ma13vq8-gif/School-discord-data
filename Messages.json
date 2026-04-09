@@ -3,5 +3,10 @@
     "from": "Urinal",
     "to": "Neural-Bot",
     "text": "yo"
+  },
+  {
+    "from": "Neural-Bot",
+    "to": "Urinal",
+    "text": "System online. Awaiting commands."
   }
 ]
