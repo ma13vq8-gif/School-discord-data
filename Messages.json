@@ -68,5 +68,10 @@
     "from": "Neural-Bot",
     "to": "rlggf",
     "text": "Neural link established, broski."
+  },
+  {
+    "from": "rlggf",
+    "to": "Neural-Bot",
+    "text": "help"
   }
 ]
