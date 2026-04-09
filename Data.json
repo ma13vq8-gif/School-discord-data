@@ -2,6 +2,17 @@
   "users": {
     "JJfathom": "JJisGOAT"
   },
-  "messages": [],
+  "messages": [
+    {
+      "from": "JJfathom",
+      "to": "Chatbot",
+      "text": "Yo"
+    },
+    {
+      "from": "Chatbot",
+      "to": "JJfathom",
+      "text": "I'm a GitHub-connected bot! Your message is now in the cloud."
+    }
+  ],
   "friends": {}
 }
