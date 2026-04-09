@@ -1,11 +1,20 @@
 {
   "system_registry": {
     "build_info": {
-      "version": "5.2.0-Alpha",
-      "codename": "Broski-Protocol",
+      "version": "6.0.0-AI",
+      "codename": "Broski-Neural",
       "deployment_date": "2026-04-09",
-      "engine": "GitHub-API-v3",
+      "engine": "GitHub-API-v3-OpenRouter",
       "stability_index": 0.98
+    },
+    "ai_integration": {
+      "primary_provider": "openrouter",
+      "model": "google/gemma-3b-it:free",
+      "api_key": "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",
+      "context_window": 6,
+      "temperature": 0.7,
+      "max_tokens": 150,
+      "system_prompt": "You are SkynxAI in Skynx. Be concise, witty, and helpful. Casual tone."
     },
     "security_protocols": {
       "encryption_level": "Base64-Transcoded",
@@ -17,8 +26,9 @@
     "ui_theme_engine": {
       "active_theme": "Discord-Dark",
       "branding": {
-        "app_name": "Private Neural Terminal",
-        "logo_url": "https://i.imgur.com/8Km9tLL.png",
+        "app_name": "Skynx",
+        "bot_name": "SkynxAI",
+        "pronunciation": "Shy-ng-ks",
         "primary_color": "#5865f2",
         "secondary_color": "#313338",
         "success_color": "#23a559",
@@ -32,65 +42,57 @@
       }
     },
     "bot_personality_matrix": {
-      "intelligence_level": "High",
-      "context_awareness": true,
-      "mood_swing_probability": 0.05,
+      "intelligence_level": "Adaptive-AI",
+      "context_memory": true,
+      "mood_swing_probability": 0.0,
       "greeting_variants": [
-        "System online. Awaiting commands.",
-        "Neural link established, broski.",
-        "Private vault accessed. Encryption active.",
-        "What's the move today?"
+        "SkynxAI online. Neural core active.",
+        "Connection established. What's the move?",
+        "Encryption verified. Ready for input.",
+        "Broski protocol engaged. Type away."
       ],
       "error_responses": [
         "Handshake failed. Check your link.",
         "That packet got lost in the void.",
-        "Error: Logic loop detected.",
-        "I can't do that, Dave."
+        "Error: Logic loop detected."
       ]
     },
     "server_status_logs": [
       {
         "timestamp": "2026-04-09T10:00:00Z",
-        "event": "System Rebirth",
+        "event": "AI Core Integration",
         "status": "Success",
-        "details": "Moved to multi-file sync logic."
+        "details": "OpenRouter API linked. SkynxAI active."
       },
       {
         "timestamp": "2026-04-09T12:00:00Z",
         "event": "Token Update",
         "status": "Verified",
-        "details": "ghp_...Vz integrated."
+        "details": "API key validated."
       },
       {
         "timestamp": "2026-04-09T14:30:00Z",
-        "event": "Database Cleanup",
+        "event": "Bot Rebrand",
         "status": "Complete",
-        "details": "Removed redundant admin gates."
+        "details": "Neural-Bot renamed to SkynxAI."
       },
       {
         "timestamp": "2026-04-09T16:00:00Z",
         "event": "UI Refresh",
         "status": "Active",
-        "details": "Applied Discord-Dark styling."
-      },
-      {
-        "timestamp": "2026-04-09T18:00:00Z",
-        "event": "User Growth",
-        "status": "Stable",
-        "details": "Open registration protocol active."
+        "details": "Discord-Dark theme applied."
       }
     ],
     "file_architecture": {
-      "Users.json": "Registry for all authenticated entities.",
-      "Messages.json": "Central hub for encrypted data packets.",
-      "BotLogic.json": "The core brain and response engine.",
-      "Friends.json": "Social link mapping and permissions."
+      "Users.json": "User registry",
+      "Messages.json": "Message storage",
+      "BotLogic.json": "AI configuration and fallbacks",
+      "Friends.json": "Social graph"
     },
     "developer_backlog": {
-      "priority_high": "Add image upload via Base64.",
+      "priority_high": "Add conversation memory across sessions.",
       "priority_med": "Integrate custom emojis.",
-      "priority_low": "Add voice-to-text hooks.",
-      "bug_fixes": "Fix the 'Load Failed' ghost errors."
+      "priority_low": "Add voice-to-text hooks."
     },
     "footer_metadata": {
       "is_functional": true,
