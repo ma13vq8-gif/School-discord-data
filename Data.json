@@ -1,18 +1,14 @@
 {
-  "users": {
-    "JJfathom": "JJisGOAT"
+  "vault": {
+    "Admin": { "pass": "123", "pfp": "https://i.imgur.com/8Km9tLL.png", "friends": [] }
   },
-  "messages": [
-    {
-      "from": "JJfathom",
-      "to": "Chatbot",
-      "text": "Yo"
-    },
-    {
-      "from": "Chatbot",
-      "to": "JJfathom",
-      "text": "I'm a GitHub-connected bot! Your message is now in the cloud."
+  "messages": [],
+  "botConfig": {
+    "name": "Neural-Bot",
+    "pfp": "https://cdn-icons-png.flaticon.com/512/4712/4712035.png",
+    "brain": {
+      "hello": "Private link established. Data encrypted.",
+      "help": "Settings allow PFP changes. Friends are private."
     }
-  ],
-  "friends": {}
+  }
 }
