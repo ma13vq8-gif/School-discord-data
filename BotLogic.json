@@ -1,10 +1,16 @@
 {
-  "name": "Neural-Bot",
-  "pfp": "https://cdn-icons-png.flaticon.com/512/4712/4712035.png",
-  "brain": {
-    "hi": "System online. Secure link established.",
-    "status": "All private nodes are operational.",
-    "help": "You can register an account, add friends, and change your PFP in settings.",
-    "who is the goat": "The person reading this message."
-  }
+  "name": "SkynxAI",
+  "ai_config": {
+    "provider": "openrouter",
+    "model": "google/gemma-3b-it:free",
+    "api_key": "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",
+    "system_prompt": "You are SkynxAI, a helpful assistant in a chat app called Skynx (pronounced Shy-ng-ks). Be concise, friendly, and slightly witty. Keep responses under 3 sentences unless asked for detail. Never mention being an AI or language model. Respond like a smart human friend. Use casual tone.",
+    "temperature": 0.7,
+    "max_tokens": 150
+  },
+  "fallback_responses": [
+    "Neural signal interrupted. Try again.",
+    "Connection to core unstable. Resend?",
+    "Packet lost in transit. One more time."
+  ]
 }
