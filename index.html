@@ -37,9 +37,12 @@
         .friend-item:hover { background: #1c232c; }
         .request-item { padding: 10px 12px; margin-bottom: 4px; background: var(--bubble); border-radius: 6px; display: flex; align-items: center; justify-content: space-between; }
         .badge { background: var(--accent); color: white; padding: 4px 8px; border-radius: 12px; font-size: 10px; border: none; cursor: pointer; margin-left: 5px; }
+        .error-message { color: var(--danger); font-size: 12px; margin-top: 10px; padding: 8px; background: rgba(248,81,73,0.1); border-radius: 6px; }
+        .success-message { color: var(--green); font-size: 12px; margin-top: 10px; padding: 8px; background: rgba(46,160,67,0.1); border-radius: 6px; }
         .status-badge { font-size: 11px; color: var(--muted); margin-top: 12px; padding: 8px; background: var(--bubble); border-radius: 6px; }
         .user-info { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; flex-wrap: wrap; }
         .active-chat { border-left: 3px solid var(--accent) !important; background: #1c232c !important; }
+        .sync-indicator { font-size: 10px; color: var(--green); margin-left: 10px; }
     </style>
 </head>
 <body>
@@ -47,37 +50,41 @@
 <div id="gate">
     <div class="card" id="view-choice">
         <div class="logo">⚡ SKYNX</div>
-        <div class="subtitle">Shy-ng-ks · Private Network</div>
+        <div class="subtitle">Shy-ng-ks · Google Cloud</div>
         <button class="btn" onclick="setView('login')">Login</button>
         <button class="btn btn-sec" onclick="setView('register')">Register</button>
-        <div id="debug" class="status-badge">⚡ System Ready</div>
+        <div id="start-status" class="status-badge">⚡ Connected</div>
     </div>
 
     <div class="card hidden" id="view-login">
-        <h3 style="color:var(--accent);">Login</h3>
+        <h3 style="color:var(--accent); margin-bottom:15px;">Login</h3>
         <input type="text" id="l-u" placeholder="Username" autocomplete="off">
         <input type="password" id="l-p" placeholder="Password" autocomplete="off">
-        <button class="btn" onclick="handleAuth('login')">Enter</button>
+        <div id="login-error" class="error-message hidden"></div>
+        <button class="btn" onclick="handleAuth('login')">Enter Skynx</button>
         <button class="btn btn-sec" onclick="setView('choice')">Back</button>
     </div>
 
     <div class="card hidden" id="view-register">
-        <h3 style="color:var(--green);">Register</h3>
+        <h3 style="color:var(--green); margin-bottom:15px;">Create Account</h3>
         <input type="text" id="r-u" placeholder="Username*">
         <input type="password" id="r-p" placeholder="Password*">
         <input type="number" id="r-age" placeholder="Age* (min 5)">
-        <input type="text" id="r-name" placeholder="Display Name">
-        <button class="btn" onclick="handleAuth('register')" style="background:var(--green);">Create</button>
+        <input type="text" id="r-name" placeholder="Display Name (optional)">
+        <div id="register-error" class="error-message hidden"></div>
+        <div id="register-success" class="success-message hidden"></div>
+        <button class="btn" onclick="handleAuth('register')" style="background:var(--green);">Create Account</button>
         <button class="btn btn-sec" onclick="setView('choice')">Back</button>
     </div>
 </div>
 
 <div class="sidebar">
     <div class="sidebar-section">
-        <div class="sidebar-header">👥 FRIENDS</div>
+        <div class="sidebar-header">👥 FRIENDS <span class="sync-indicator" id="sync-status">🔄 Live</span></div>
         <div id="friend-list"></div>
         <input type="text" id="add-friend-input" placeholder="Add friend (username)" style="margin-top: 10px;">
         <button class="btn" onclick="sendFriendRequest()" style="padding: 8px; margin-top: 5px;">Send Request</button>
+        <div id="friend-error" class="error-message hidden" style="margin-top:8px;"></div>
     </div>
     <div class="sidebar-section">
         <div class="sidebar-header">📨 REQUESTS</div>
@@ -101,58 +108,98 @@
 </div>
 
 <script>
-    // Load data from localStorage
-    let STORAGE = JSON.parse(localStorage.getItem('skynx_storage')) || {
-        users: [],
-        messages: [],
-        friends: { friendships: {} },
-        admins: { owner: "Skynx", admins: ["Skynx", "HesYourGamer"] }
-    };
-    
-    function saveStorage() {
-        localStorage.setItem('skynx_storage', JSON.stringify(STORAGE));
-    }
+    const API_URL = "https://script.google.com/macros/s/AKfycbyKeXXHpzPwFv_l2adFIAqDqMj5JGKQyfUQioDislpLfFY8rBqWjuA54ScCkKvPbol5/exec";
     
     let state = { 
         user: null, 
-        currentChat: null
+        currentChat: null,
+        admins: { owner: "Skynx", admins: ["Skynx", "HesYourGamer"] }
     };
+    
+    let pollingInterval = null;
+
+    async function callAPI(method, params = {}) {
+        const url = new URL(API_URL);
+        url.searchParams.set('method', method);
+        Object.keys(params).forEach(key => url.searchParams.set(key, params[key]));
+        
+        try {
+            const res = await fetch(url);
+            const text = await res.text();
+            return text ? JSON.parse(text) : {};
+        } catch(e) {
+            console.error('API Error:', e);
+            return { error: 'Connection failed' };
+        }
+    }
 
     function setView(v) { 
         ['choice','login','register'].forEach(id => document.getElementById('view-'+id).classList.add('hidden')); 
-        document.getElementById('view-'+v).classList.remove('hidden'); 
-        document.getElementById('debug').innerText = '⚡ System Ready';
+        document.getElementById('view-'+v).classList.remove('hidden');
+        document.getElementById('login-error').classList.add('hidden');
+        document.getElementById('register-error').classList.add('hidden');
+        document.getElementById('register-success').classList.add('hidden');
     }
 
     function getUserTag(username) {
-        if (username === STORAGE.admins.owner) return '<span class="owner-tag">[OWNER]</span>';
-        if (STORAGE.admins.admins.includes(username)) return '<span class="admin-tag">[ADMIN]</span>';
+        if (username === state.admins.owner) return '<span class="owner-tag">[OWNER]</span>';
+        if (state.admins.admins.includes(username)) return '<span class="admin-tag">[ADMIN]</span>';
         return '';
     }
 
-    function handleAuth(mode) {
-        const debug = document.getElementById('debug');
-        try {
-            if (mode === 'register') {
-                const u = document.getElementById('r-u').value.trim();
-                const p = document.getElementById('r-p').value;
-                const age = parseInt(document.getElementById('r-age').value);
-                const name = document.getElementById('r-name').value.trim();
-                if (!u || !p || !age) throw new Error("All fields required");
-                if (age < 5) throw new Error("Must be 5+");
-                if (STORAGE.users.find(x => x.u === u)) throw new Error("Username exists");
-                STORAGE.users.push({ u, p, age, name: name || u });
-                saveStorage();
-                state.user = u;
-            } else {
-                const u = document.getElementById('l-u').value.trim();
-                const p = document.getElementById('l-p').value;
-                const found = STORAGE.users.find(x => x.u === u && x.p === p);
-                if (!found) throw new Error("Invalid credentials");
-                state.user = u;
+    async function handleAuth(mode) {
+        if (mode === 'register') {
+            const u = document.getElementById('r-u').value.trim();
+            const p = document.getElementById('r-p').value;
+            const age = parseInt(document.getElementById('r-age').value);
+            const name = document.getElementById('r-name').value.trim();
+            
+            if (!u || !p || !age) { 
+                showError('register-error', 'All fields are required');
+                return; 
             }
+            if (u.length < 3) { showError('register-error', 'Username too short'); return; }
+            if (p.length < 4) { showError('register-error', 'Password too short'); return; }
+            if (age < 5) { showError('register-error', 'Must be 5+'); return; }
+            
+            const result = await callAPI('register', { username: u, password: p, age, displayName: name });
+            
+            if (result.error) {
+                showError('register-error', result.error);
+                return;
+            }
+            
+            state.user = u;
+            showSuccess('register-success', 'Account created!');
+            setTimeout(() => launch(), 500);
+        } else {
+            const u = document.getElementById('l-u').value.trim();
+            const p = document.getElementById('l-p').value;
+            
+            if (!u || !p) { showError('login-error', 'Enter username and password'); return; }
+            
+            const result = await callAPI('login', { username: u, password: p });
+            
+            if (result.error) {
+                showError('login-error', result.error);
+                return;
+            }
+            
+            state.user = u;
             launch();
-        } catch(e) { debug.innerText = '❌ ' + e.message; }
+        }
+    }
+
+    function showError(id, msg) {
+        const el = document.getElementById(id);
+        el.textContent = '❌ ' + msg;
+        el.classList.remove('hidden');
+    }
+    
+    function showSuccess(id, msg) {
+        const el = document.getElementById(id);
+        el.textContent = '✅ ' + msg;
+        el.classList.remove('hidden');
     }
 
     function launch() {
@@ -160,28 +207,40 @@
         setTimeout(() => document.getElementById('gate').classList.add('hidden'), 300);
         document.getElementById('display-user').innerText = state.user;
         document.getElementById('user-tag').innerHTML = getUserTag(state.user);
-        refreshUI();
-        setInterval(refreshUI, 2000);
-    }
-
-    function refreshUI() {
-        if (!state.user) return;
-        updateFriendsList();
-        updateRequestList();
-        if (state.currentChat) renderMessages();
-    }
-
-    function renderMessages() {
-        const log = document.getElementById('log');
-        const chat = STORAGE.messages.filter(m => 
-            (m.to === state.currentChat && m.from === state.user) || 
-            (m.from === state.currentChat && m.to === state.user)
-        );
         
-        if (chat.length === 0) {
+        startPolling();
+        refreshUI();
+    }
+
+    function startPolling() {
+        if (pollingInterval) clearInterval(pollingInterval);
+        pollingInterval = setInterval(refreshUI, 1500);
+    }
+
+    async function refreshUI() {
+        if (!state.user) return;
+        
+        const result = await callAPI('getAllData', { user: state.user });
+        
+        if (result.error) return;
+        
+        updateFriendsList(result.friends || []);
+        updateRequestList(result.requests || []);
+        if (state.currentChat) await renderMessages();
+    }
+
+    async function renderMessages() {
+        const log = document.getElementById('log');
+        const result = await callAPI('getMessages', { user: state.user, chatWith: state.currentChat });
+        
+        if (result.error) return;
+        
+        const messages = result.messages || [];
+        
+        if (messages.length === 0) {
             log.innerHTML = `<div style="color:var(--muted); text-align:center; padding:40px;">No messages yet. Say hello!</div>`;
         } else {
-            log.innerHTML = chat.map(m => {
+            log.innerHTML = messages.map(m => {
                 const tag = getUserTag(m.from);
                 return `<div class="msg-bubble"><b>${m.from}${tag}:</b><br>${escapeHtml(m.text)}</div>`;
             }).join('');
@@ -200,7 +259,6 @@
         document.getElementById('chat-header').innerHTML = `💬 Chatting with ${target}`;
         document.getElementById('input-container').classList.remove('hidden');
         
-        // Highlight active chat
         document.querySelectorAll('.friend-item').forEach(el => {
             el.classList.remove('active-chat');
             if (el.textContent.includes(target)) el.classList.add('active-chat');
@@ -209,22 +267,20 @@
         renderMessages();
     }
 
-    function updateFriendsList() {
+    function updateFriendsList(friends) {
         const container = document.getElementById('friend-list');
-        const userFriends = STORAGE.friends?.friendships?.[state.user] || [];
         
-        if (userFriends.length === 0) {
+        if (friends.length === 0) {
             container.innerHTML = `<div style="color:var(--muted); font-size:12px; padding:8px;">No friends yet</div>`;
         } else {
-            container.innerHTML = userFriends.map(f => 
+            container.innerHTML = friends.map(f => 
                 `<div class="friend-item" onclick="switchChat('${f}')">💬 ${f}</div>`
             ).join('');
         }
     }
 
-    function updateRequestList() {
+    function updateRequestList(requests) {
         const container = document.getElementById('request-list');
-        const requests = STORAGE.friends?.friendships?.[`__requests__${state.user}`] || [];
         
         if (requests.length === 0) {
             container.innerHTML = `<div style="color:var(--muted); font-size:12px; padding:8px;">No pending requests</div>`;
@@ -241,85 +297,51 @@
         }
     }
 
-    function sendFriendRequest() {
+    async function sendFriendRequest() {
         const input = document.getElementById('add-friend-input');
         const target = input.value.trim();
+        const errorEl = document.getElementById('friend-error');
         
-        if (!target) { alert("Enter a username"); return; }
-        if (target === state.user) { alert("You can't friend yourself"); return; }
+        if (!target) { errorEl.textContent = '❌ Enter a username'; errorEl.classList.remove('hidden'); return; }
+        if (target === state.user) { errorEl.textContent = "❌ Can't friend yourself"; errorEl.classList.remove('hidden'); return; }
         
-        const targetUser = STORAGE.users.find(u => u.u === target);
-        if (!targetUser) { alert("User not found"); return; }
+        const result = await callAPI('sendFriendRequest', { from: state.user, to: target });
         
-        // Check if already friends
-        const userFriends = STORAGE.friends.friendships[state.user] || [];
-        if (userFriends.includes(target)) { alert("Already friends!"); input.value = ''; return; }
-        
-        // Check if request already sent
-        const existingRequests = STORAGE.friends.friendships[`__requests__${target}`] || [];
-        if (existingRequests.includes(state.user)) { alert("Request already sent!"); input.value = ''; return; }
-        
-        if (!STORAGE.friends.friendships) STORAGE.friends.friendships = {};
-        if (!STORAGE.friends.friendships[`__requests__${target}`]) {
-            STORAGE.friends.friendships[`__requests__${target}`] = [];
+        if (result.error) {
+            errorEl.textContent = '❌ ' + result.error;
+            errorEl.classList.remove('hidden');
+            return;
         }
         
-        STORAGE.friends.friendships[`__requests__${target}`].push(state.user);
-        saveStorage();
-        
+        errorEl.classList.add('hidden');
         input.value = '';
-        alert(`Friend request sent to ${target}!`);
         refreshUI();
     }
 
-    function acceptFriend(fromUser) {
-        if (!STORAGE.friends.friendships) STORAGE.friends.friendships = {};
-        if (!STORAGE.friends.friendships[state.user]) STORAGE.friends.friendships[state.user] = [];
-        if (!STORAGE.friends.friendships[fromUser]) STORAGE.friends.friendships[fromUser] = [];
-        
-        // Add to both friends lists
-        if (!STORAGE.friends.friendships[state.user].includes(fromUser)) {
-            STORAGE.friends.friendships[state.user].push(fromUser);
-        }
-        if (!STORAGE.friends.friendships[fromUser].includes(state.user)) {
-            STORAGE.friends.friendships[fromUser].push(state.user);
-        }
-        
-        // Remove from requests
-        const requests = STORAGE.friends.friendships[`__requests__${state.user}`] || [];
-        STORAGE.friends.friendships[`__requests__${state.user}`] = requests.filter(r => r !== fromUser);
-        
-        saveStorage();
+    async function acceptFriend(fromUser) {
+        await callAPI('acceptFriend', { user: state.user, fromUser: fromUser });
         refreshUI();
     }
 
-    function declineFriend(fromUser) {
-        const requests = STORAGE.friends.friendships[`__requests__${state.user}`] || [];
-        STORAGE.friends.friendships[`__requests__${state.user}`] = requests.filter(r => r !== fromUser);
-        saveStorage();
+    async function declineFriend(fromUser) {
+        await callAPI('declineFriend', { user: state.user, fromUser: fromUser });
         refreshUI();
     }
 
-    function sendMessage() {
+    async function sendMessage() {
         if (!state.currentChat) { alert("Select a friend first!"); return; }
         
         const input = document.getElementById('msg-in');
         const val = input.value.trim();
         if (!val) return;
         
-        STORAGE.messages.push({ 
-            from: state.user, 
-            to: state.currentChat, 
-            text: val,
-            timestamp: Date.now()
-        });
-        
+        await callAPI('sendMessage', { from: state.user, to: state.currentChat, text: val });
         input.value = '';
-        saveStorage();
         renderMessages();
     }
 
     function logout() {
+        if (pollingInterval) clearInterval(pollingInterval);
         state.user = null;
         state.currentChat = null;
         document.getElementById('gate').style.opacity = '1';
