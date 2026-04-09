@@ -8,5 +8,10 @@
     "from": "Neural-Bot",
     "to": "Urinal",
     "text": "System online. Awaiting commands."
+  },
+  {
+    "from": "rlggf",
+    "to": "Neural-Bot",
+    "text": "yo"
   }
 ]
